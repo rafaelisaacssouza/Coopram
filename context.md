@@ -166,7 +166,11 @@ Lembretes:
 
 ---
 
-## 7. Migração para grid — ponto de partida
+## 7. Grid de colunas (migração feita)
+
+Aplicado em `style.css` (logo após `.rail`): `--cols` 12 / 6 (≤880) / 4 (≤560), `--gutter`; os blocos `.cabeca`, `.texto-duplo`, `.mapa__grade`, `.numeros`, `.produto`, `#sensorial > .rail`, `.ficha-layout` e `.contato` usam a mesma grade e posicionam os filhos com `grid-column`. Colunas usadas: cabeça/texto-duplo/mapa/sensorial 1–5 + 7–12; produto 1–6 + 8–12; ficha 1–3 + 5–12; contato 1–6 + 8–12; números 4+4+4 (2+2+2 no tablet). Até 880px todo filho ocupa `1/-1`. `.estrutura` e `.manifesto` mantêm o grid próprio com linhas de 1px. Botão **Grid** (ou tecla G) mostra a sobreposição das colunas: temporário, remover antes de publicar (seção 9b do CSS e 8 do JS).
+
+Texto original do plano, para referência:
 
 Hoje cada seção define o próprio `grid-template-columns` em `fr` (ver tabela da seção 3). Sugestão de sistema:
 

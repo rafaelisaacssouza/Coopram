@@ -87,6 +87,14 @@ blockquote{margin:0;font-family:var(--f-tit);font-size:var(--t-lead);line-height
 ::selection{background:var(--lima);color:var(--noite)}
 
 .rail{width:100%;max-width:var(--max);margin-inline:auto;padding-inline:var(--rail)}
+
+/* Grade de colunas (12 / 6 / 4) dentro do .rail. Cada bloco de
+   seção usa a mesma grade e só escolhe em que colunas cada filho
+   começa e termina; o espaço vertical continua por seção. */
+@media(max-width:880px){:root{--cols:6}}
+@media(max-width:560px){:root{--cols:4}}
+.grade,.cabeca,.texto-duplo,.mapa__grade,.numeros,.produto,#sensorial>.rail,.ficha-layout,.contato{
+  display:grid;grid-template-columns:repeat(var(--cols),minmax(0,1fr));column-gap:var(--gutter)}
 .oculto{position:absolute;width:1px;height:1px;overflow:hidden;clip:rect(0 0 0 0)}
 .pular{position:fixed;top:8px;left:50%;z-index:300;transform:translate(-50%,-160%);
   background:var(--lima);color:var(--noite);border-radius:999px;padding:12px 24px;
@@ -394,10 +402,12 @@ blockquote{margin:0;font-family:var(--f-tit);font-size:var(--t-lead);line-height
 .secao--grao{background:var(--grao)}
 .secao--contato{background:var(--noite)}
 
-.cabeca{display:grid;grid-template-columns:minmax(0,.9fr) minmax(0,1.1fr);
-  gap:var(--sp-5) var(--sp-7);align-items:end;margin-bottom:var(--sp-8)}
+/* título nas colunas 1–5, texto nas 7–12 */
+.cabeca{row-gap:var(--sp-5);align-items:end;margin-bottom:var(--sp-8)}
+.cabeca>:first-child{grid-column:1/6}
+.cabeca>:last-child:not(:first-child){grid-column:7/13}
 .cabeca h2{font-size:var(--t-h2)}
-.cabeca p{max-width:46ch;margin:0}
+.cabeca p{margin:0}
 .cabeca p+p{margin-top:1.15em}
 .secao--clara .cabeca p,.secao--papel .cabeca p{color:#4C4136}
 #estrutura .cabeca,#qualidade .cabeca,.territorio__grade,.exportacao__topo{align-items:start}
@@ -407,8 +417,9 @@ blockquote{margin:0;font-family:var(--f-tit);font-size:var(--t-lead);line-height
 .eixo::before{content:"";width:30px;height:2px;background:var(--lima);flex:none}
 .eixo--claro{color:var(--pasto-claro)}
 
-.texto-duplo{display:grid;grid-template-columns:minmax(0,.8fr) minmax(0,1.2fr);
-  gap:var(--sp-7);align-items:start;margin-bottom:var(--sp-8)}
+.texto-duplo{row-gap:var(--sp-7);align-items:start;margin-bottom:var(--sp-8)}
+.texto-duplo>:first-child{grid-column:1/6}
+.texto-duplo>:last-child{grid-column:7/13}
 
 .botao{display:inline-flex;align-items:center;gap:14px;background:var(--lima);color:var(--noite);
   border-radius:999px;padding:18px 34px;font-family:var(--f-tit);font-weight:700;
@@ -416,16 +427,18 @@ blockquote{margin:0;font-family:var(--f-tit);font-size:var(--t-lead);line-height
 .botao:hover{transform:translateY(-3px);background:#96db26}
 .botao--hero{margin-top:.25rem}
 
+/* até 880px: tudo em uma coluna (todas as colunas da grade) */
 @media(max-width:880px){
-  .cabeca,.texto-duplo{grid-template-columns:minmax(0,1fr)}
+  .cabeca>*,.texto-duplo>*,.mapa__grade>*,.produto>*,#sensorial>.rail>*,
+  .ficha-layout>*,.contato>*{grid-column:1/-1!important}
 }
 
 /* origem · mapa de altitude */
 .mapa{position:relative;padding-block:var(--sp-9);overflow:hidden;background:var(--mata)}
 .mapa__linhas{position:absolute;inset:0;opacity:.55}
-.mapa__grade{position:relative;display:grid;grid-template-columns:minmax(0,1fr) minmax(0,.92fr);
-  gap:var(--sp-7);align-items:center}
-.mapa__texto{max-width:44ch}
+.mapa__grade{position:relative;row-gap:var(--sp-7);align-items:center}
+.mapa__texto{grid-column:1/6}
+.mapa__grade .perfil{grid-column:7/13}
 .mapa h2{font-size:var(--t-h2);margin-bottom:var(--sp-4)}
 .perfil{position:relative}
 .perfil svg{width:100%;height:auto;overflow:visible}
@@ -435,20 +448,21 @@ blockquote{margin:0;font-family:var(--f-tit);font-size:var(--t-lead);line-height
 .perfil text{font-family:var(--f-tit);font-weight:600;fill:var(--nevoa);font-size:15px}
 .perfil text.leve{fill:var(--pedra);font-weight:400;font-size:13px}
 .perfil circle{fill:var(--laranja)}
-@media(max-width:880px){.mapa__grade{grid-template-columns:minmax(0,1fr)}}
 
 /* gerações · números */
 #geracoes{background:var(--grao);color:var(--nevoa)}
-.numeros{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:clamp(32px,5vw,88px);
+/* três blocos de 4 colunas (2 de 6 no tablet; um por linha abaixo de 767px) */
+.numeros{row-gap:clamp(32px,5vw,88px);
   margin-top:var(--sp-7);padding-block:clamp(58px,7vw,104px);
   border-top:1px solid rgba(244,239,228,.12)}
-.numero{min-width:0}
+.numero{min-width:0;grid-column:span 4}
+@media(max-width:880px){.numero{grid-column:span 2}}
 .numero__ic{width:clamp(28px,2.2vw,34px);height:auto;margin-bottom:var(--sp-4);
   fill:none;stroke:currentColor;stroke-width:1.6;stroke-linecap:round;stroke-linejoin:round;color:#FFFDF8}
 .numero b{display:block;font-family:var(--f-tit);font-weight:800;font-size:clamp(2.8rem,1rem + 5vw,5.4rem);
   line-height:.86;letter-spacing:-.05em;color:var(--lima)}
 .numero span{display:block;margin-top:var(--sp-3);font-size:.9rem;color:rgba(244,239,228,.68);max-width:20ch}
-@media(max-width:767px){.numeros{grid-template-columns:minmax(0,1fr)}}
+@media(max-width:767px){.numero{grid-column:1/-1}}
 @media(max-width:560px){.numeros{padding-block:50px}}
 
 /* cooperação · estrutura */
@@ -473,8 +487,10 @@ blockquote{margin:0;font-family:var(--f-tit);font-size:var(--t-lead);line-height
 .territorio__texto{padding-top:.2rem}
 
 /* produto */
-.produto{display:grid;grid-template-columns:minmax(0,1.05fr) minmax(0,.95fr);
-  gap:clamp(48px,8vw,132px);align-items:center}
+/* arte nas colunas 1–6, texto nas 8–12 */
+.produto{row-gap:clamp(48px,8vw,132px);align-items:center}
+.produto>:first-child{grid-column:1/7}
+.produto>:last-child{grid-column:8/13}
 .produto h2{font-size:var(--t-h2);margin-bottom:var(--sp-4)}
 .subproduto{color:var(--lima);margin-bottom:var(--sp-5)}
 .produto__arte{position:relative;aspect-ratio:1;display:grid;place-items:center;isolation:isolate}
@@ -485,21 +501,20 @@ blockquote{margin:0;font-family:var(--f-tit);font-size:var(--t-lead);line-height
   box-shadow:0 34px 90px rgba(0,0,0,.28)}
 .produto-imagem{width:88%;height:auto;max-height:100%;object-fit:contain}
 @media(max-width:880px){
-  .produto{grid-template-columns:minmax(0,1fr)}
   .produto__arte{max-width:620px;width:100%;margin-inline:auto}
 }
 
 /* perfil sensorial */
-#sensorial>.rail{display:grid;grid-template-columns:minmax(0,.9fr) minmax(340px,1.1fr);
-  gap:clamp(46px,8vw,140px);align-items:start}
-#sensorial .cabeca{display:block;position:sticky;top:150px;margin:0}
+/* título sticky nas colunas 1–5, atributos nas 7–12 */
+#sensorial>.rail{row-gap:var(--sp-6);align-items:start}
+#sensorial .cabeca{display:block;position:sticky;top:150px;margin:0;grid-column:1/6}
+#sensorial .sensorial{grid-column:7/13}
 .sensorial article{min-height:185px;padding:clamp(28px,4vw,56px) 0;
   border-bottom:1px solid rgba(244,239,228,.22)}
 .sensorial article:first-child{border-top:1px solid rgba(244,239,228,.22)}
 .sensorial h3{font-size:clamp(1.35rem,1rem + 1vw,2rem);color:var(--pasto-claro)}
 .sensorial p{color:rgba(244,239,228,.75);max-width:38ch}
 @media(max-width:880px){
-  #sensorial>.rail{grid-template-columns:minmax(0,1fr);gap:var(--sp-6)}
   #sensorial .cabeca{position:static}
   .sensorial article{min-height:0}
 }
@@ -538,9 +553,10 @@ blockquote{margin:0;font-family:var(--f-tit);font-size:var(--t-lead);line-height
 @media(max-width:560px){.manifesto span{min-height:180px}}
 
 /* ficha técnica */
-.ficha-layout{display:grid;grid-template-columns:minmax(250px,.7fr) minmax(420px,1.3fr);
-  gap:clamp(54px,9vw,150px);align-items:start}
-.ficha-titulo{position:sticky;top:150px}
+/* título sticky nas colunas 1–3, tabela nas 5–12 */
+.ficha-layout{row-gap:var(--sp-6);align-items:start}
+.ficha-titulo{position:sticky;top:150px;grid-column:1/4}
+.ficha-layout>.ficha{grid-column:5/13}
 .ficha-titulo h2{font-size:var(--t-h2);max-width:7ch}
 .ficha{border-top:1px solid rgba(244,239,228,.3)}
 .ficha__lista{margin:0}
@@ -551,7 +567,6 @@ blockquote{margin:0;font-family:var(--f-tit);font-size:var(--t-lead);line-height
 .ficha dd{margin:0}
 .ficha__nota{margin-top:var(--sp-4);font-size:.82rem;color:rgba(244,239,228,.62)}
 @media(max-width:880px){
-  .ficha-layout{grid-template-columns:minmax(0,1fr);gap:var(--sp-6)}
   .ficha-titulo{position:static}
   .ficha-titulo h2{max-width:12ch}
   .ficha__head{display:none}
@@ -561,7 +576,10 @@ blockquote{margin:0;font-family:var(--f-tit);font-size:var(--t-lead);line-height
 }
 
 /* contato */
-.contato{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,.8fr);gap:var(--sp-7);align-items:end}
+/* chamada nas colunas 1–6, dados nas 8–12 */
+.contato{row-gap:var(--sp-7);align-items:end}
+.contato>:first-child{grid-column:1/7}
+.contato>:last-child{grid-column:8/13}
 .contato h2{font-size:var(--t-h1);letter-spacing:-.045em;line-height:.9}
 .contato__intro{max-width:42ch;margin-top:var(--sp-5);color:rgba(244,239,228,.72)}
 .contato .botao{margin-top:var(--sp-5)}
@@ -570,7 +588,6 @@ blockquote{margin:0;font-family:var(--f-tit);font-size:var(--t-lead);line-height
 .dados a:hover{color:var(--lima);border-color:var(--lima)}
 .dados b{font-family:var(--f-tit);display:block;font-size:.74rem;letter-spacing:.22em;
   text-transform:uppercase;color:var(--pedra);margin-bottom:4px;font-weight:600}
-@media(max-width:880px){.contato{grid-template-columns:minmax(0,1fr)}}
 
 /* chamada final */
 .cta-final{display:grid;align-items:center;min-height:82vh;overflow:hidden;text-align:center;background:var(--mata)}
@@ -612,8 +629,6 @@ blockquote{margin:0;font-family:var(--f-tit);font-size:var(--t-lead);line-height
 /* ══ 9b · GRADE DE ANÁLISE (temporário, só para desenvolvimento) ══
    Mostra as colunas do grid planejado por cima da página.
    Liga/desliga pelo botão .grade-botao ou pela tecla G. */
-@media(max-width:880px){:root{--cols:6}}
-@media(max-width:560px){:root{--cols:4}}
 .grade-guia{position:fixed;inset:0;z-index:150;pointer-events:none;display:none}
 .grade-guia.ligada{display:block}
 .grade-guia .rail{height:100%;display:grid;
