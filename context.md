@@ -1,7 +1,7 @@
 # CONTEXTO — Site Café das Montanhas Capixabas (COOPRAM)
 
 Documento de referência para quem for editar o projeto (pessoa ou assistente de IA).
-Descreve o estado atual e o plano de migração para **GSAP + Lenis** e **layout em grid**.
+Descreve o estado atual. A migração para **GSAP + Lenis** está feita; a de **layout em grid** é a próxima etapa.
 
 ---
 
@@ -9,7 +9,7 @@ Descreve o estado atual e o plano de migração para **GSAP + Lenis** e **layout
 
 - One-page institucional/comercial da COOPRAM (cooperativa de Domingos Martins, ES) para o produto
   **Café das Montanhas Capixabas — Café Arábica Verde Especial**. Foco: compradores e exportação.
-- **Stack atual:** HTML + CSS + JS puros. Nenhuma dependência, nenhum build.
+- **Stack atual:** HTML + CSS + JS puros, sem build. Animação com GSAP 3.13.0 (ScrollTrigger, CustomEase) e rolagem suave com Lenis 1.3.4, em cópias locais em `assets/js/vendor/`.
 - Idiomas: PT (padrão), EN, ES — troca em tempo real, sem recarregar.
 - Origem: exportado de um projeto Lovable (React/TanStack que só exibia este HTML num iframe).
 
@@ -17,6 +17,7 @@ Descreve o estado atual e o plano de migração para **GSAP + Lenis** e **layout
 index.html
 assets/css/style.css     tokens + todos os estilos (organizado por seções numeradas)
 assets/js/main.js        todo o comportamento (IIFE, sem módulos)
+assets/js/vendor/        gsap, ScrollTrigger, CustomEase, lenis (.min.js, versões fixas)
 assets/js/i18n.js        window.COOPRAM_I18N = { pt:{}, en:{}, es:{} }
 assets/fonts/arome.woff2 fonte da marca (títulos "Origem", lockup, ano)
 assets/img/*.webp        imagens + favicon.png / apple-touch-icon.png
@@ -82,7 +83,7 @@ Padrão de seção: `section.secao[.secao--clara|--papel|--cereja] > .rail > .ca
 - IDs: `#abertura`, `#contAbre`, `#topo`, `#menuPrincipal`, `#tri`, `#rotSecao`, `#origem`, `#pe-cafe` (symbol SVG no topo do body).
 - Classes lidas pelo JS: `.tri__palco`, `.tri__ceu--cereja`, `.tri__linhas`, `.tri__folha`, `.tri__scrim`, `.tri__gravura`, `.pe--tri-e`, `.pe--tri-d`, `.ato--1/2/3`, `.cdlm--palco`, `.role i b`, `.role`, `.saida`, `.pe`, `.rev`, `.menu-toggle`, `.idiomas button[data-lang]`.
 - Atributos: `data-linhas="tri|mapa"` (SVG das cordilheiras), `data-secao` + `data-rotulo` (rótulo do rodapé do palco), `data-d="1|2|3"` (atraso do reveal).
-- Classes de estado: `body.travado`, `body.pronto`, `.abertura.sobe/.sai`, `.topo.densa`, `.pe.cresceu`, `.rev.viu`, `.menu.aberto`, `.tri--calmo`, `.perfil.viu` (dispara o traço do perfil de altitude; quem adiciona é o próprio reveal, porque o `.perfil` também tem `.rev` — ao trocar o reveal por GSAP, essa animação precisa de gatilho próprio).
+- Classes de estado: `body.pronto`, `.topo.densa`, `.menu.aberto`, `.tri--calmo`, `.pe.cresceu` (só no movimento reduzido). O Lenis põe `html.lenis` / `.lenis-stopped` (rolagem travada durante a abertura). As antigas `body.travado`, `.abertura.sobe/.sai`, `.rev.viu`, `.perfil.viu` e `.i18n-fade` não existem mais: essas animações são tweens GSAP no main.js. O traço do `.perfil .solo` tem gatilho próprio.
 
 ### Estados de fallback (manter)
 
@@ -107,7 +108,9 @@ Padrão de seção: `section.secao[.secao--clara|--papel|--cereja] > .rail > .ca
 
 ---
 
-## 6. Inventário de animações → plano GSAP + Lenis
+## 6. Inventário de animações → GSAP + Lenis (migração feita)
+
+Decisões tomadas na migração: bibliotecas locais; o Triscroll **manteve o `sticky` + `260vh`** (um `ScrollTrigger` entrega `progress` para a `cena(p)` e o filtro manual foi removido); sem SplitText (i18n intacto); marquees e menu continuam em CSS. A tabela abaixo é o plano original, mantido como referência.
 
 | Animação                                  | Como é hoje                                                                                                                               | Proposta GSAP/Lenis                                                                                                                                                                                                                                                        |
 | ----------------------------------------- | ----------------------------------------------------------------------------------------------------------------------------------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |

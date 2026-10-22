@@ -1,7 +1,8 @@
 /* ══════════════════════════════════════════════════════════════
    COOPRAM · Café das Montanhas Capixabas
-   Comportamento da página — sem dependências externas.
-   Depende de js/i18n.js (window.COOPRAM_I18N), carregado antes.
+   Comportamento da página.
+   Depende, carregados antes: js/vendor (GSAP, ScrollTrigger,
+   CustomEase, Lenis) e js/i18n.js (window.COOPRAM_I18N).
    ══════════════════════════════════════════════════════════════ */
 (function(){
   "use strict";
@@ -10,11 +11,35 @@
   var palcoTri = document.getElementById("tri");
 
   /* O HTML chega no modo "calmo" (legível sem JS). Com JS e sem
-     pedido de movimento reduzido, liga o palco e trava a rolagem
-     enquanto a abertura roda. */
+     pedido de movimento reduzido, liga o palco. */
+  if(!calmo && palcoTri) palcoTri.classList.remove("tri--calmo");
+
+  /* ── · GSAP + LENIS ──────────────────────────────────────────
+     Lenis suaviza a rolagem (só com movimento liberado) e avisa o
+     ScrollTrigger a cada quadro; os dois rodam no mesmo relógio. */
+  gsap.registerPlugin(ScrollTrigger, CustomEase);
+  CustomEase.create("eOut", ".16,.84,.44,1");
+  CustomEase.create("eIo", ".72,0,.24,1");
+  CustomEase.create("ePe", ".24,.78,.26,1");
+
+  var lenis = null;
   if(!calmo){
-    document.body.classList.add("travado");
-    if(palcoTri) palcoTri.classList.remove("tri--calmo");
+    lenis = new Lenis({lerp: 0.1});
+    lenis.on("scroll", ScrollTrigger.update);
+    gsap.ticker.add(function(t){ lenis.raf(t * 1000); });
+    gsap.ticker.lagSmoothing(0);
+
+    /* âncoras internas passam pelo Lenis para não dar salto seco */
+    document.querySelectorAll('a[href^="#"]').forEach(function(a){
+      var alvo = a.getAttribute("href");
+      if(alvo.length < 2 || a.classList.contains("pular")) return;
+      a.addEventListener("click", function(e){
+        var el = document.querySelector(alvo);
+        if(!el) return;
+        e.preventDefault();
+        lenis.scrollTo(el);
+      });
+    });
   }
 
   /* ── 0 · IDIOMAS ─────────────────────────────────────────────
@@ -55,8 +80,9 @@
     var menu = document.querySelector(".menu-toggle");
     if(menu) menu.setAttribute("aria-label", translateText(menu.getAttribute("aria-expanded") === "true" ? "Fechar menu" : "Abrir menu"));
     try{ localStorage.setItem("coopram-lang", idioma); }catch(e){}
-    document.body.classList.remove("i18n-fade");
-    requestAnimationFrame(function(){ document.body.classList.add("i18n-fade"); });
+    if(!calmo) gsap.fromTo("main", {opacity:.75}, {opacity:1, duration:.25, ease:"power1.out", clearProps:"opacity"});
+    /* textos mudam de altura: recalcula os pontos de gatilho */
+    ScrollTrigger.refresh();
   }
 
   var escolhido = "pt";
@@ -66,34 +92,81 @@
     b.addEventListener("click", function(){ traduz(b.dataset.lang); });
   });
 
-  /* ── 1 · ABERTURA ────────────────────────────────────────── */
+  /* ── 1 · PÉ DE CAFÉ ──────────────────────────────────────────
+     A ilustração é revelada por clip-path do rodapé para o topo. */
+  var PE_SVG = '<svg viewBox="0 0 3750 5950" aria-hidden="true"><use href="#pe-cafe"/></svg>';
+  var pes = document.querySelectorAll(".pe");
+  pes.forEach(function(p){ p.innerHTML = PE_SVG; });
+
+  function cresce(pe, gatilho){
+    gsap.fromTo(pe.querySelector("svg"),
+      {clipPath:"inset(100% 0% 0% 0%)", y:16, scaleY:.93},
+      {clipPath:"inset(0% 0% 0% 0%)", y:0, scaleY:1, duration:3.3, ease:"ePe",
+       scrollTrigger: gatilho ? {trigger:pe, start:"top 84%", once:true} : undefined});
+  }
+
+  var pesTri = [];
+  if(calmo){
+    pes.forEach(function(p){ p.classList.add("cresceu"); });
+  }else{
+    pes.forEach(function(p){
+      /* os ramos do palco crescem logo depois da abertura */
+      if(p.closest("#tri")) pesTri.push(p);
+      else cresce(p, true);
+    });
+  }
+
+  /* ── 2 · ABERTURA ────────────────────────────────────────────
+     Uma linha do tempo só: serra traçada, marca, cantos e
+     contador; depois as três lâminas sobem e a cortina sai. A
+     rolagem fica parada (lenis.stop) até a saída. */
   var abertura = document.getElementById("abertura");
   var contAbre = document.getElementById("contAbre");
 
   function libera(){
-    document.body.classList.remove("travado");
+    if(lenis) lenis.start();
     document.body.classList.add("pronto");
     if(abertura) abertura.setAttribute("aria-hidden", "true");
+    ScrollTrigger.refresh();
   }
 
   if(calmo || !abertura){
     if(abertura) abertura.remove();
+    pesTri.forEach(function(p){ cresce(p, false); });
     libera();
   }else{
-    var dur = 2100, t0 = performance.now();
-    (function conta(now){
-      var p = Math.min(1, (now - t0) / dur);
-      var n = Math.round(100 * (1 - Math.pow(1 - p, 3)));
-      contAbre.textContent = n < 10 ? "0" + n : String(n);
-      if(p < 1) requestAnimationFrame(conta);
-    })(t0);
+    lenis.stop();
+    var mata = getComputedStyle(document.documentElement).getPropertyValue("--mata").trim();
+    var laminas = abertura.querySelectorAll(".lamina");
+    var lugares = abertura.querySelectorAll(".lugar");
+    var conta = {v:0};
 
-    setTimeout(function(){ abertura.classList.add("sobe"); }, 2350);
-    setTimeout(function(){ abertura.classList.add("sai"); libera(); }, 3550);
-    setTimeout(function(){ abertura.remove(); }, 5200);
+    gsap.set(laminas, {xPercent:-50, yPercent:0, y:0, rotation:function(i){ return [-9, 7, -3][i]; }});
+
+    var abre = gsap.timeline({onComplete:function(){ abertura.remove(); }});
+    abre
+      .to(abertura.querySelectorAll(".abertura__serra path"),
+          {strokeDashoffset:0, duration:2.1, ease:"eOut", stagger:function(i){ return [0, .16, .32, .46][i] || 0; }}, 0)
+      .to(conta, {v:100, duration:2.1, ease:"power2.out", onUpdate:function(){
+          var n = Math.round(conta.v);
+          contAbre.textContent = n < 10 ? "0" + n : String(n);
+        }}, 0)
+      .to(".abertura__marca img", {opacity:1, y:0, scale:1, duration:.95, ease:"eOut"}, .35)
+      .to(".abertura__marca p", {opacity:1, duration:.9, ease:"eOut"}, .72)
+      .to(lugares, {opacity:1, duration:.85, ease:"eOut", stagger:.15}, .9)
+      /* sobe: o conteúdo some, as lâminas atravessam e o fundo vira mata */
+      .addLabel("sobe", 2.35)
+      .to([".abertura__marca", lugares, ".abertura__cont", ".abertura__serra"], {opacity:0, duration:.5, ease:"power1.inOut"}, "sobe")
+      .to(laminas, {yPercent:-50, y:function(){ return -window.innerHeight / 2; },
+          rotation:function(i){ return [-4, 3, 0][i]; }, duration:1.25, ease:"eIo", stagger:.14}, "sobe")
+      .to(abertura, {backgroundColor:mata, duration:.5, ease:"power1.inOut"}, "sobe+=.62")
+      /* sai: libera a rolagem e a cortina sobe inteira */
+      .add(libera, 3.55)
+      .add(function(){ pesTri.forEach(function(p){ cresce(p, false); }); }, 3.8)
+      .to(abertura, {yPercent:-101, duration:1.05, ease:"eIo"}, 3.9);
   }
 
-  /* ── 2 · LINHAS VIVAS ────────────────────────────────────────
+  /* ── 3 · LINHAS VIVAS ────────────────────────────────────────
      Cordilheiras desenhadas a cada quadro. Onda triangular com
      a crista arredondada: silhueta de montanha, não serrote. */
   var NS = "http://www.w3.org/2000/svg";
@@ -156,49 +229,28 @@
       : {h:600, n:3, topo:210, amp:70,  op:.36, preenche:.20, tons:["#5E1A15","#4E1512","#3E110F"]});
     m.svg = svg; m.visivel = true;
     mapas.push(m);
+    desenha(m, 0);
   });
 
-  if(calmo){
-    mapas.forEach(function(m){ desenha(m, 0); });
-  }else{
-    /* cordilheira fora da tela não é desenhada */
-    var obsLinhas = new IntersectionObserver(function(en){
-      en.forEach(function(e){
-        mapas.forEach(function(m){ if(m.svg === e.target) m.visivel = e.isIntersecting; });
+  if(!calmo){
+    /* cordilheira fora da tela (com 120px de folga) não é desenhada */
+    mapas.forEach(function(m){
+      ScrollTrigger.create({
+        trigger: m.svg, start: "top bottom+=120", end: "bottom top-=120",
+        onToggle: function(s){ m.visivel = s.isActive; },
+        onRefresh: function(s){ m.visivel = s.isActive; }
       });
-    }, {rootMargin:"120px"});
-    mapas.forEach(function(m){ obsLinhas.observe(m.svg); });
-
-    (function anima(now){
-      var t = now / 1000;
+    });
+    gsap.ticker.add(function(t){
       for(var i = 0; i < mapas.length; i++){ if(mapas[i].visivel) desenha(mapas[i], t); }
-      requestAnimationFrame(anima);
-    })(0);
-  }
-
-  /* ── 3 · PÉ DE CAFÉ ──────────────────────────────────────────
-     A ilustração é revelada por clip-path do rodapé para o topo. */
-  var PE_SVG = '<svg viewBox="0 0 3750 5950" aria-hidden="true"><use href="#pe-cafe"/></svg>';
-  var pes = document.querySelectorAll(".pe");
-  pes.forEach(function(p){ p.innerHTML = PE_SVG; });
-
-  if(calmo){
-    pes.forEach(function(p){ p.classList.add("cresceu"); });
-  }else{
-    var obsPe = new IntersectionObserver(function(en){
-      en.forEach(function(e){
-        if(e.isIntersecting){ e.target.classList.add("cresceu"); obsPe.unobserve(e.target); }
-      });
-    }, {rootMargin:"0px 0px -16% 0px", threshold:.04});
-    pes.forEach(function(p){
-      if(p.closest("#tri")) setTimeout(function(){ p.classList.add("cresceu"); }, 3800);
-      else obsPe.observe(p);
     });
   }
 
   /* ── 4 · TRISCROLL ───────────────────────────────────────────
-     O palco fica preso na tela e o rolar vira linha do tempo.
-     Uma progressão de 0 a 1 comanda céu, folha, ramos e atos. */
+     O palco fica preso na tela (sticky) e o rolar vira linha do
+     tempo. Uma progressão de 0 a 1 comanda céu, folha, ramos e
+     atos. O ScrollTrigger entrega a progressão; o Lenis já
+     suaviza a rolagem, então não há filtro próprio aqui. */
   if(palcoTri){
     var ceuCer   = palcoTri.querySelector(".tri__ceu--cereja");
     var linhasT  = palcoTri.querySelector(".tri__linhas");
@@ -222,13 +274,6 @@
       x = (x - a) / (b - a);
       x = x < 0 ? 0 : (x > 1 ? 1 : x);
       return x * x * (3 - 2 * x);
-    };
-
-    var progresso = function(){
-      var alto = palcoTri.offsetHeight - window.innerHeight;
-      if(alto <= 0) return 0;
-      var p = -palcoTri.getBoundingClientRect().top / alto;
-      return p < 0 ? 0 : (p > 1 ? 1 : p);
     };
 
     var cena = function(p){
@@ -300,29 +345,12 @@
     };
 
     if(!calmo){
-      /* Filtro de um polo entre a rolagem e a cena: um clique de
-         roda (~100px) não faz a folha saltar. */
-      var pAlvo = progresso(), pSuave = pAlvo, rodando = false;
-
-      var tique = function(){
-        var g = Math.abs(pAlvo - pSuave);
-        var k = 0.16 + 0.62 * Math.min(1, g * 3.2);
-        pSuave += (pAlvo - pSuave) * k;
-        if(g < 0.0008){ pSuave = pAlvo; rodando = false; }
-        cena(pSuave);
-        if(rodando) requestAnimationFrame(tique);
-      };
-      var medir = function(){
-        pAlvo = progresso();
-        if(!rodando){ rodando = true; requestAnimationFrame(tique); }
-      };
-      window.addEventListener("scroll", medir, {passive:true});
-      window.addEventListener("resize", medir);
-      window.addEventListener("load", medir);
-      cena(pSuave);
-      /* a abertura trava o corpo: reencena quando ela sai */
-      setTimeout(medir, 3800);
-      setTimeout(medir, 5400);
+      var stTri = ScrollTrigger.create({
+        trigger: palcoTri, start: "top top", end: "bottom bottom",
+        onUpdate: function(s){ cena(s.progress); },
+        onRefresh: function(s){ cena(s.progress); }
+      });
+      cena(stTri.progress);
 
       /* Teclas de página saltam para o pico de cada ato e, no
          último, liberam para a seção seguinte. */
@@ -332,9 +360,7 @@
         return r.top <= 1 && r.bottom >= window.innerHeight - 1;
       };
       var irPara = function(p){
-        var alto = palcoTri.offsetHeight - window.innerHeight;
-        var topo = window.scrollY + palcoTri.getBoundingClientRect().top;
-        window.scrollTo({top: Math.round(topo + alto * p), behavior: "smooth"});
+        lenis.scrollTo(Math.round(stTri.start + (stTri.end - stTri.start) * p));
       };
       document.addEventListener("keydown", function(e){
         if(e.metaKey || e.ctrlKey || e.altKey) return;
@@ -344,18 +370,18 @@
         var volta  = e.key === "PageUp"   || (e.key === " " && e.shiftKey);
         if((!avanca && !volta) || !ancorado()) return;
         e.preventDefault();
-        var p = progresso(), i;
+        var p = stTri.progress, i;
         if(avanca){
           for(i = 0; i < PARADAS.length; i++){
             if(PARADAS[i] > p + 0.03){ irPara(PARADAS[i]); return; }
           }
           var prox = document.getElementById("origem");
-          if(prox) prox.scrollIntoView({behavior:"smooth", block:"start"});
+          if(prox) lenis.scrollTo(prox);
         }else{
           for(i = PARADAS.length - 1; i >= 0; i--){
             if(PARADAS[i] < p - 0.03){ irPara(PARADAS[i]); return; }
           }
-          window.scrollTo({top:0, behavior:"smooth"});
+          lenis.scrollTo(0);
         }
       });
     }
@@ -363,29 +389,46 @@
 
   /* ── 5 · TOPO E RÓTULO DE SEÇÃO ──────────────────────────── */
   var topo = document.getElementById("topo");
-  window.addEventListener("scroll", function(){
-    topo.classList.toggle("densa", window.scrollY > 80);
-  }, {passive:true});
+  ScrollTrigger.create({start: 80, end: "max", toggleClass: {targets: topo, className: "densa"}});
 
+  /* a seção que cruza o centro da tela dá nome ao rótulo */
   var rotSecao = document.getElementById("rotSecao");
-  var obsSecao = new IntersectionObserver(function(entradas){
-    entradas.forEach(function(e){
-      if(e.isIntersecting){
-        var reg = atributos.find(function(a){ return a.el === e.target && a.attr === "data-rotulo"; });
+  document.querySelectorAll("[data-secao]").forEach(function(s){
+    ScrollTrigger.create({
+      trigger: s, start: "top center", end: "bottom center",
+      onToggle: function(st){
+        if(!st.isActive) return;
+        var reg = atributos.find(function(a){ return a.el === s && a.attr === "data-rotulo"; });
         chaveRot = reg ? reg.key : "A serra";
         rotSecao.textContent = translateText(chaveRot);
       }
     });
-  }, {rootMargin:"-45% 0px -45% 0px"});
-  document.querySelectorAll("[data-secao]").forEach(function(s){ obsSecao.observe(s); });
+  });
 
-  /* ── 6 · REVELAÇÃO ───────────────────────────────────────── */
-  var obsRev = new IntersectionObserver(function(entradas){
-    entradas.forEach(function(e){
-      if(e.isIntersecting){ e.target.classList.add("viu"); obsRev.unobserve(e.target); }
+  /* ── 6 · REVELAÇÃO ───────────────────────────────────────────
+     Cada .rev sobe 30px e aparece uma vez; data-d="1|2|3" atrasa
+     em décimos de segundo para escalonar blocos vizinhos. */
+  if(!calmo){
+    ScrollTrigger.batch(".rev", {
+      start: "top 88%", once: true,
+      onEnter: function(lote){
+        lote.forEach(function(el){
+          gsap.to(el, {opacity:1, y:0, duration:1.05, ease:"eOut",
+            delay: (parseInt(el.getAttribute("data-d"), 10) || 0) * 0.1});
+        });
+      }
     });
-  }, {rootMargin:"0px 0px -12% 0px", threshold:.12});
-  document.querySelectorAll(".rev").forEach(function(el){ obsRev.observe(el); });
+
+    /* o perfil de altitude também é .rev; o traço tem gatilho próprio */
+    var solo = document.querySelector(".perfil .solo");
+    if(solo){
+      gsap.to(solo, {strokeDashoffset:0, duration:2.4, delay:.2, ease:"eOut",
+        scrollTrigger: {trigger: ".perfil", start: "top 88%", once: true}});
+    }
+  }
+
+  /* fontes mudam a altura dos blocos: recalcula quando chegam */
+  if(document.fonts && document.fonts.ready) document.fonts.ready.then(function(){ ScrollTrigger.refresh(); });
 
   /* ── 7 · MENU RESPONSIVO ─────────────────────────────────── */
   var menuBotao = document.querySelector(".menu-toggle");
