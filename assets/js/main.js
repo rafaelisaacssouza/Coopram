@@ -425,6 +425,23 @@
       gsap.to(solo, {strokeDashoffset:0, duration:2.4, delay:.2, ease:"eOut",
         scrollTrigger: {trigger: ".perfil", start: "top 88%", once: true}});
     }
+
+    /* contadores: os números de .numero b sobem de 0 até o valor
+       quando a seção aparece. Lê o texto traduzido a cada quadro,
+       então "6ª" / "6th" / "6.ª" mantêm o sufixo do idioma atual. */
+    document.querySelectorAll(".numero b").forEach(function(b){
+      var no = b.firstChild;
+      if(!no || no.nodeType !== 3) return;
+      var chave = no.textContent.trim();
+      var alvo = parseInt((chave.match(/\d+/) || [])[0], 10);
+      if(!alvo) return;
+      var conta = {v:0};
+      var mostra = function(){ no.textContent = translateText(chave).replace(/\d+/, Math.round(conta.v)); };
+      mostra();
+      gsap.to(conta, {v:alvo, duration: alvo > 20 ? 2.2 : 1.4, ease:"power2.out", delay:.25,
+        onUpdate: mostra,
+        scrollTrigger: {trigger: b, start: "top 88%", once: true}});
+    });
   }
 
   /* fontes mudam a altura dos blocos: recalcula quando chegam */
