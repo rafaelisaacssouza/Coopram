@@ -450,42 +450,4 @@
       if(e.key === "Escape" && menuPrincipal.classList.contains("aberto")){ fechaMenu(); menuBotao.focus(); }
     });
   }
-
-  /* ── 8 · GRADE DE ANÁLISE (temporário) ───────────────────────
-     Sobrepõe as colunas do grid planejado (12 / 6 / 4) para
-     comparar com o layout atual. Botão no canto ou tecla G.
-     Criado depois do walker do i18n, então não é traduzido. */
-  var guia = document.createElement("div");
-  guia.className = "grade-guia";
-  guia.setAttribute("aria-hidden", "true");
-  var trilho = document.createElement("div");
-  trilho.className = "rail";
-  for(var col = 1; col <= 12; col++){
-    var faixa = document.createElement("span");
-    faixa.textContent = col;
-    trilho.appendChild(faixa);
-  }
-  guia.appendChild(trilho);
-  document.body.appendChild(guia);
-
-  var botaoGrade = document.createElement("button");
-  botaoGrade.type = "button";
-  botaoGrade.className = "grade-botao";
-  botaoGrade.textContent = "Grid";
-  document.body.appendChild(botaoGrade);
-
-  function grade(liga){
-    guia.classList.toggle("ligada", liga);
-    botaoGrade.setAttribute("aria-pressed", String(liga));
-    try{ localStorage.setItem("coopram-grade", liga ? "1" : "0"); }catch(e){}
-  }
-  var gradeSalva = false;
-  try{ gradeSalva = localStorage.getItem("coopram-grade") === "1"; }catch(e){}
-  grade(gradeSalva);
-  botaoGrade.addEventListener("click", function(){ grade(!guia.classList.contains("ligada")); });
-  document.addEventListener("keydown", function(e){
-    var t = e.target;
-    if(e.metaKey || e.ctrlKey || e.altKey || (t && (t.tagName === "INPUT" || t.tagName === "TEXTAREA" || t.isContentEditable))) return;
-    if(e.key === "g" || e.key === "G") grade(!guia.classList.contains("ligada"));
-  });
 })();

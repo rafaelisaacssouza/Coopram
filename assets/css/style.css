@@ -626,24 +626,6 @@ blockquote{margin:0;font-family:var(--f-tit);font-size:var(--t-lead);line-height
 /* estado inicial; a entrada (com o atraso de data-d) é GSAP no main.js */
 .rev{opacity:0;transform:translateY(30px)}
 
-/* ══ 9b · GRADE DE ANÁLISE (temporário, só para desenvolvimento) ══
-   Mostra as colunas do grid planejado por cima da página.
-   Liga/desliga pelo botão .grade-botao ou pela tecla G. */
-.grade-guia{position:fixed;inset:0;z-index:150;pointer-events:none;display:none}
-.grade-guia.ligada{display:block}
-.grade-guia .rail{height:100%;display:grid;
-  grid-template-columns:repeat(var(--cols),minmax(0,1fr));column-gap:var(--gutter);
-  outline:1px dashed rgba(174,1,60,.55);outline-offset:-1px}
-.grade-guia .rail span{background:rgba(174,1,60,.10);border-inline:1px solid rgba(174,1,60,.35);
-  font:600 10px/1 var(--f-tit);color:rgba(174,1,60,.9);text-align:center;padding-top:84px}
-@media(max-width:880px){.grade-guia .rail span:nth-child(n+7){display:none}}
-@media(max-width:560px){.grade-guia .rail span:nth-child(n+5){display:none}}
-.grade-botao{position:fixed;left:16px;bottom:16px;z-index:310;
-  background:var(--magenta);color:#fff;border:0;border-radius:999px;padding:10px 16px;
-  font:700 .74rem/1 var(--f-tit);letter-spacing:.08em;text-transform:uppercase;cursor:pointer;
-  box-shadow:0 4px 16px rgba(0,0,0,.3)}
-.grade-botao[aria-pressed="true"]{background:var(--lima);color:var(--noite)}
-
 /* ══ 10 · MOVIMENTO REDUZIDO ═════════════════════════════════ */
 @media(prefers-reduced-motion:reduce){
   *,*::before,*::after{animation-duration:.01ms!important;animation-iteration-count:1!important;
