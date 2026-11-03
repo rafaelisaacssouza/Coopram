@@ -29,7 +29,10 @@
     gsap.ticker.add(function(t){ lenis.raf(t * 1000); });
     gsap.ticker.lagSmoothing(0);
 
-    /* âncoras internas passam pelo Lenis para não dar salto seco */
+    /* âncoras internas passam pelo Lenis para não dar salto seco.
+       A duração cresce com a distância (1,2s a 2,6s) e a curva
+       acelera e freia devagar, para saltos longos não parecerem bruscos. */
+    var suaveIO = function(t){ return t < .5 ? 4 * t * t * t : 1 - Math.pow(-2 * t + 2, 3) / 2; };
     document.querySelectorAll('a[href^="#"]').forEach(function(a){
       var alvo = a.getAttribute("href");
       if(alvo.length < 2 || a.classList.contains("pular")) return;
@@ -37,7 +40,9 @@
         var el = document.querySelector(alvo);
         if(!el) return;
         e.preventDefault();
-        lenis.scrollTo(el);
+        var dist = Math.abs(el.getBoundingClientRect().top);
+        var dur = Math.min(2.6, Math.max(1.2, 1.2 + dist / 5000));
+        lenis.scrollTo(el, {duration: dur, easing: suaveIO});
       });
     });
   }
@@ -70,6 +75,11 @@
     bases.forEach(function(b){ b.node.textContent = b.value.replace(b.key, translateText(b.key)); });
     atributos.forEach(function(a){ a.el.setAttribute(a.attr, translateText(a.key)); });
     document.documentElement.lang = {pt:"pt-BR", en:"en", es:"es"}[idioma];
+    /* imagens com texto têm uma versão por idioma */
+    document.querySelectorAll("img[data-src-idioma]").forEach(function(img){
+      var src = img.dataset.srcIdioma.replace("{lang}", idioma);
+      if(img.getAttribute("src") !== src) img.setAttribute("src", src);
+    });
     document.querySelectorAll(".idiomas button").forEach(function(b){
       var on = b.dataset.lang === idioma;
       b.classList.toggle("ativo", on);
@@ -94,7 +104,7 @@
 
   /* ── 1 · PÉ DE CAFÉ ──────────────────────────────────────────
      A ilustração é revelada por clip-path do rodapé para o topo. */
-  var PE_SVG = '<svg viewBox="0 0 3750 5950" aria-hidden="true"><use href="#pe-cafe"/></svg>';
+  var PE_SVG = '<svg viewBox="0 0 3750 5950" aria-hidden="true"><use href="assets/img/pe-cafe.svg#pe-cafe"/></svg>';
   var pes = document.querySelectorAll(".pe");
   pes.forEach(function(p){ p.innerHTML = PE_SVG; });
 

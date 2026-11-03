@@ -19,11 +19,11 @@ assets/css/style.css     tokens + todos os estilos (organizado por seções nume
 assets/js/main.js        todo o comportamento (IIFE, sem módulos)
 assets/js/vendor/        gsap, ScrollTrigger, CustomEase, lenis (.min.js, versões fixas)
 assets/js/i18n.js        window.COOPRAM_I18N = { pt:{}, en:{}, es:{} }
-assets/fonts/arome.woff2 fonte da marca (títulos "Origem", lockup, ano)
-assets/img/*.webp        imagens + favicon.png / apple-touch-icon.png
+assets/fonts/           arome.woff2 (marca) · archivo.woff2 · roboto.woff2
+assets/img/             imagens .webp (folha também em .avif) · pe-cafe.svg · favicon.png / apple-touch-icon.png
 ```
 
-Fontes externas: Google Fonts (Archivo 400–800, Roboto 300–700).
+Fontes locais (sem Google Fonts): `archivo.woff2` e `roboto.woff2` são variáveis (subconjunto latin, todos os pesos num arquivo) + `arome.woff2`. O desenho do pé de café fica em `assets/img/pe-cafe.svg` (`<use href="assets/img/pe-cafe.svg#pe-cafe">`); por isso o site precisa ser aberto por um servidor (ex.: Live Server), não por `file://`.
 
 ---
 
@@ -105,6 +105,7 @@ Padrão de seção: `section.secao[.secao--clara|--papel|--cereja] > .rail > .ca
      - ou só aplique SplitText em elementos sem tradução, ou mude o i18n para atributos `data-i18n="chave"` (recomendado se for usar SplitText em muitos títulos).
   3. Texto injetado depois do carregamento não é traduzido automaticamente.
 - Idioma por URL: `?lang=en|es`; lembrado em `localStorage("coopram-lang")`.
+- Imagens com texto têm um arquivo por idioma: `<img data-src-idioma="assets/img/nome-{lang}.webp">` — o `traduz()` troca o `src` (hoje: `cafe-das-montanhas-produto-*` na seção Produto e `cafe-das-montanhas-lockup-*` no ato 2 da abertura).
 
 ---
 

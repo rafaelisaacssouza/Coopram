@@ -8,6 +8,19 @@
   src:url("../fonts/arome.woff2") format("woff2");
   font-weight:400;font-style:normal;font-display:swap;
 }
+/* Archivo e Roboto: fontes variáveis (subconjunto latin do Google Fonts), um arquivo cobre todos os pesos */
+@font-face{
+  font-family:"Archivo";
+  src:url("../fonts/archivo.woff2") format("woff2");
+  font-weight:100 900;font-style:normal;font-display:swap;
+  unicode-range:U+0000-00FF,U+0131,U+0152-0153,U+02BB-02BC,U+02C6,U+02DA,U+02DC,U+0304,U+0308,U+0329,U+2000-206F,U+20AC,U+2122,U+2191,U+2193,U+2212,U+2215,U+FEFF,U+FFFD;
+}
+@font-face{
+  font-family:"Roboto";
+  src:url("../fonts/roboto.woff2") format("woff2");
+  font-weight:100 900;font-style:normal;font-display:swap;
+  unicode-range:U+0000-00FF,U+0131,U+0152-0153,U+02BB-02BC,U+02C6,U+02DA,U+02DC,U+0304,U+0308,U+0329,U+2000-206F,U+20AC,U+2122,U+2191,U+2193,U+2212,U+2215,U+FEFF,U+FFFD;
+}
 
 /* ══ TOKENS ══════════════════════════════════════════════════ */
 :root{
@@ -147,7 +160,7 @@ blockquote{margin:0;font-family:var(--f-tit);font-size:var(--t-lead);line-height
 
 /* ══ 2 · CABEÇALHO ═══════════════════════════════════════════ */
 .topo{position:fixed;top:0;left:0;right:0;z-index:100;padding-block:var(--sp-4);
-  transition:background .4s ease,backdrop-filter .4s ease,padding .4s ease}
+  transition:background .7s var(--e-out),backdrop-filter .7s var(--e-out),padding .7s var(--e-out)}
 .topo.densa{background:rgba(12,35,24,.82);backdrop-filter:blur(14px);padding-block:var(--sp-3)}
 .topo__grade{display:grid;grid-template-columns:auto minmax(0,1fr) auto;align-items:center;
   gap:clamp(18px,2.4vw,42px)}
@@ -265,6 +278,7 @@ blockquote{margin:0;font-family:var(--f-tit);font-size:var(--t-lead);line-height
 .tri__folha{position:absolute;left:50%;top:47%;width:min(86vw,960px);z-index:-3;
   transform:translate(-50%,-50%);filter:drop-shadow(0 40px 90px rgba(0,0,0,.5));
   will-change:transform,opacity;opacity:0}
+.tri__folha picture{display:block}
 .tri__folha img{width:100%}
 .tri__scrim{position:absolute;inset:0;z-index:-2;pointer-events:none;opacity:0;will-change:opacity;
   background:
@@ -366,22 +380,11 @@ blockquote{margin:0;font-family:var(--f-tit);font-size:var(--t-lead);line-height
 .tri--calmo .tri__gravura{opacity:.16;bottom:2%;transform:translateX(-50%)}
 
 /* ══ 5 · LOCKUP "CAFÉ DAS MONTANHAS" ═════════════════════════ */
-.cdlm{position:relative;display:grid;justify-items:center;width:min(78%,362px);color:#F2EEE2}
+.cdlm{position:relative;display:grid;justify-items:center;width:min(78%,380px,36svh);color:#F2EEE2}
+.cdlm__img{display:block;width:100%;height:auto}
 .cdlm--palco::before{content:"";position:absolute;left:50%;top:48%;transform:translate(-50%,-50%);
   width:180%;height:190%;z-index:-1;border-radius:50%;
   background:radial-gradient(closest-side,rgba(8,25,15,.72),rgba(8,25,15,.34) 58%,transparent 78%)}
-.cdlm__grao{width:53%;margin-bottom:5%}
-.cdlm__l1,.cdlm__l2{margin:0;font-family:var(--f-marca);font-weight:400;text-transform:uppercase;
-  line-height:.92;text-align:center;color:#FFFDF8}
-.cdlm__l1{font-size:clamp(1.05rem,.72rem + 1.05vw,1.72rem);letter-spacing:.055em}
-.cdlm__l2{font-size:clamp(1.85rem,1.2rem + 2vw,3.1rem);letter-spacing:.015em;margin-top:.12em}
-.cdlm__filete{display:block;width:80%;height:1.6px;background:#D1D7A1;opacity:.85;margin:8.5% 0 6.5%}
-.cdlm__desc{margin:0;font-family:var(--f-tit);font-weight:700;text-transform:uppercase;
-  letter-spacing:.13em;line-height:1.5;text-align:center;color:#DFD5B8;width:96%;
-  font-size:clamp(.68rem,.5rem + .58vw,1.02rem)}
-@media(max-width:767px){
-  .cdlm__l2{max-width:100%;font-size:2rem}
-}
 
 /* ══ 6 · FAIXA CORRENDO ══════════════════════════════════════ */
 .tira{border-block:1px solid rgba(244,239,228,.12);overflow:hidden;padding-block:var(--sp-4);
@@ -494,12 +497,8 @@ blockquote{margin:0;font-family:var(--f-tit);font-size:var(--t-lead);line-height
 .produto h2{font-size:var(--t-h2);margin-bottom:var(--sp-4)}
 .subproduto{color:var(--lima);margin-bottom:var(--sp-5)}
 .produto__arte{position:relative;aspect-ratio:1;display:grid;place-items:center;isolation:isolate}
-.produto__arte::before{content:"";position:absolute;inset:3%;z-index:-1;
-  border-radius:50% 48% 52% 46%;
-  background:radial-gradient(circle at 45% 42%,var(--mata-alta),var(--mata) 58%,var(--noite));
-  border:2px solid color-mix(in srgb,var(--lima) 42%,transparent);
-  box-shadow:0 34px 90px rgba(0,0,0,.28)}
-.produto-imagem{width:88%;height:auto;max-height:100%;object-fit:contain}
+.produto-imagem{width:88%;height:auto;max-height:100%;object-fit:contain;
+  filter:drop-shadow(0 34px 50px rgba(0,0,0,.32))}
 @media(max-width:880px){
   .produto__arte{max-width:620px;width:100%;margin-inline:auto}
 }
