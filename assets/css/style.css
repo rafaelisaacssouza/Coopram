@@ -294,14 +294,18 @@ blockquote{margin:0;font-family:var(--f-tit);font-size:var(--t-lead);line-height
   line-height:1.2;letter-spacing:-.025em;max-width:17ch;margin:0}
 .ato__lead--centro{max-width:24ch;text-align:center;margin:var(--sp-5) auto 0;font-size:1.1rem}
 .ato__nota{max-width:44ch;font-size:.99rem;margin:0}
-.ato__base{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1fr);
-  gap:var(--sp-5) var(--sp-7);align-items:start;margin-top:var(--sp-6)}
+.ato__base{display:grid;grid-template-columns:1fr;justify-items:start;
+  gap:clamp(14px,3svh,34px);align-items:start;margin-top:clamp(16px,4svh,52px)}
 
-/* ato 1 · a serra, sobre a mata */
-.ato--1{color:var(--nevoa)}
+/* ato 1 · a serra, sobre a mata
+   tamanhos limitados também pela altura (svh) para caber em telas baixas */
+.ato--1{color:var(--nevoa);padding-block:clamp(72px,12svh,120px) clamp(60px,10svh,100px)}
+.ato--1 .ato__eixo{margin-bottom:clamp(10px,2.4svh,22px)}
+.ato--1 .ato__lead{font-size:clamp(1.15rem,min(.95rem + 1.35vw,4.2svh),2.05rem)}
+.ato--1 .botao--hero{padding:clamp(12px,2.4svh,18px) clamp(24px,4svh,34px)}
 .ato--1 .ato__eixo{color:var(--pedra)}
 .ato--1 .ato__nota{color:rgba(246,242,232,.94)}
-.tri__marca{font-size:clamp(2.7rem,11.5vw,9.8rem);letter-spacing:-.055em;line-height:.8;
+.tri__marca{font-size:clamp(2.7rem,min(11.5vw,13svh),9.8rem);letter-spacing:-.055em;line-height:.8;
   text-transform:uppercase;white-space:normal;max-width:12ch;color:#FFFDF8;margin:0;
   text-shadow:0 14px 54px rgba(0,0,0,.5)}
 .ato__assinatura{margin:var(--sp-3) 0 0;font-family:var(--f-tit);font-weight:700;
@@ -348,11 +352,11 @@ blockquote{margin:0;font-family:var(--f-tit);font-size:var(--t-lead);line-height
 .role i b{position:absolute;inset:0;background:var(--lima);transform:translateX(-100%);will-change:transform}
 
 @media(min-width:1200px){
-  .tri__marca{font-size:var(--t-h1)}
+  .tri__marca{font-size:clamp(2.6rem,min(.9rem + 6.6vw,13svh),6.4rem)}
 }
 @media(max-width:880px){
   .tri{height:250vh}
-  .tri__marca{font-size:clamp(2.6rem,14vw,5.5rem)}
+  .tri__marca{font-size:clamp(2.6rem,min(14vw,13svh),5.5rem)}
   .tri__folha{width:132vw}
   .ato__base{grid-template-columns:1fr}
   .ato--3__grade{grid-template-columns:1fr;justify-items:start}
@@ -552,10 +556,10 @@ blockquote{margin:0;font-family:var(--f-tit);font-size:var(--t-lead);line-height
 @media(max-width:560px){.manifesto span{min-height:180px}}
 
 /* ficha técnica */
-/* título sticky nas colunas 1–3, tabela nas 5–12 */
+/* título sticky nas colunas 1–3, tabela nas 6–12 */
 .ficha-layout{row-gap:var(--sp-6);align-items:start}
 .ficha-titulo{position:sticky;top:150px;grid-column:1/4}
-.ficha-layout>.ficha{grid-column:5/13}
+.ficha-layout>.ficha{grid-column:6/13}
 .ficha-titulo h2{font-size:var(--t-h2);max-width:7ch}
 .ficha{border-top:1px solid rgba(244,239,228,.3)}
 .ficha__lista{margin:0}
